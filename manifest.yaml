@@ -1,0 +1,147 @@
+app-id: com.opera.Opera.ffmpeg
+runtime: org.freedesktop.Platform
+runtime-version: '23.08'
+sdk: org.freedesktop.Sdk
+base: org.chromium.Chromium.BaseApp
+#base: org.chromium.Chromium
+base-version: '22.08'
+#command: opera
+#separate-locales: false
+# finish-args:
+#   - --require-version=1.8.2
+#   - --device=all
+#   - --env=GTK_PATH=/app/lib/gtkmodules
+#   - --share=ipc
+#   - --share=network
+#   - --socket=cups
+#   - --socket=pcsc # FIDO2
+#   - --socket=pulseaudio
+#   - --socket=x11
+#   - --system-talk-name=org.freedesktop.UPower
+#   - --talk-name=com.canonical.AppMenu.Registrar
+#   - --talk-name=org.freedesktop.FileManager1
+#   - --talk-name=org.freedesktop.Notifications
+#   - --talk-name=org.freedesktop.ScreenSaver
+#   - --talk-name=org.freedesktop.secrets
+#   - --talk-name=org.kde.kwalletd5
+#   - --talk-name=org.gnome.SessionManager
+#   - --system-talk-name=org.freedesktop.Avahi
+#   - --own-name=org.mpris.MediaPlayer2.chromium.*
+#   - --filesystem=xdg-download
+#   - --filesystem=/run/.heim_org.h5l.kcm-socket
+#   - --persist=.pki
+
+_build_flags:
+  - 'is_component_build=false'
+  - 'is_component_ffmpeg=true'
+  - 'use_sysroot=false'
+  - 'use_qt=false'
+  - 'use_glib=false'
+  - 'ozone_platform_x11=false'
+
+_ffmpeg_build_flags:
+  - "ffmpeg_branding=\"ChromeOS\""
+  - "proprietary_codecs=true"
+  - "enable_platform_hevc=true"
+  - "enable_platform_ac3_eac3_audio=true"
+  - "enable_platform_mpeg_h_audio=true"
+  - "enable_platform_dolby_vision=true"
+  - "enable_mse_mpeg2ts_stream_parser=true"
+
+
+# Disabled because of issue #28
+#add-extensions:
+#  org.chromium.Chromium.Codecs:
+#    directory: opera/chromium-codecs
+#    add-ld-path: lib
+#    autodownload: true
+#    autodelete: true
+#    version: stable
+#cleanup-commands:
+#  - mkdir -p ${FLATPAK_DEST}/opera/chromium-codecs
+
+modules:
+  # - name: dconf
+  #   buildsystem: meson
+  #   config-opts:
+  #     - -Dbash_completion=false
+  #     - -Dman=false
+  #     - -Dvapi=false
+  #   cleanup:
+  #     - /etc
+  #     - /include
+  #     - ca.desrt.dconf.service
+  #     - dconf.service
+  #     - dconf-service
+  #     - '*.pc'
+  #   sources:
+  #     - type: archive
+  #       url: https://download.gnome.org/sources/dconf/0.40/dconf-0.40.0.tar.xz
+  #       sha256: cf7f22a4c9200421d8d3325c5c1b8b93a36843650c9f95d6451e20f0bcb24533
+  #       x-checker-data:
+  #         type: gnome
+  #         name: dconf
+  #         stable-only: true
+  #     # From: https://src.fedoraproject.org/rpms/dconf
+  #     - type: patch
+  #       path: dconf-override.patch
+
+  # - name: zypak
+  #   sources:
+  #     - type: git
+  #       url: https://github.com/refi64/zypak
+  #       tag: v2022.04
+  #       commit: 55a60d110301e8dd37b631503c3524ab7baaf7aa
+  #       x-checker-data:
+  #         type: git
+  #         tag-pattern: ^v([\d.]+)$
+
+  - name: opera-ffmpeg
+    buildsystem: cmake-ninja
+    build-commands:
+      - mkdir -p /app/opera-ffmpeg #/app/tmp-install/data
+      - cd chromium
+      - python tools/clang/scripts/update.py
+      - python tools/rust/update_rust.py
+      - export PATH="${srcdir}/chromium-${pkgver}/third_party/llvm-build/Release+Asserts/bin:$PATH"
+      - export CC="clang"
+      - export CXX="clang++"
+      - gn gen -v --fail-on-unused-args --args="${_build_flags[*]} ${_ffmpeg_build_flags[*]}" --script-executable=/usr/bin/python out/ffmpegso
+      - ninja -C out/ffmpegso libffmpeg.so
+      
+
+      # - bsdtar -xf opera.deb -C /app/tmp-install
+      # - bsdtar -xf /app/tmp-install/data.tar.xz -C /app/tmp-install/data
+      # - mv /app/tmp-install/data/usr/lib/x86_64-linux-gnu/opera /app
+      # - rm -rf /app/tmp-install opera.deb
+# Disabled because of issue #28
+#      - mkdir /app/opera/lib_extra
+#      - ln -s /app/opera/chromium-codecs/lib/libffmpeg.so /app/opera/lib_extra/libffmpeg.so
+      # - install -Dm 644 com.opera.Opera.desktop /app/share/applications/com.opera.Opera.desktop
+      # - install -Dm 644 Opera_2015_icon.svg /app/share/icons/hicolor/scalable/apps/com.opera.Opera.svg
+      # - install -Dm 755 opera.sh /app/bin/opera
+      # - install -Dm 644 -t /app/etc cobalt.ini
+      # - install -Dm 644 -t /app/share/metainfo com.opera.Opera.metainfo.xml
+    sources:
+      - type: archive
+        url: https://commondatastorage.googleapis.com/chromium-browser-official/chromium-120.0.6099.109.tar.xz
+        sha256: 87c00c525ee07c2233b78dbece1496b697f686244a67fac2c71e4a30bd96849b 
+        dest-filename: chromium.tar.xz
+        only-arches: [x86_64]
+      #   x-checker-data:
+      #     type: anitya
+      #     project-id: 7242
+      #     stable-only: true
+      #     url-template: https://get.geo.opera.com/pub/opera/desktop/$version/linux/Opera_${version}_amd64.deb
+      # - type: file
+      #   path: cobalt.ini
+      # - type: file
+      #   path: com.opera.Opera.metainfo.xml
+      # - type: file
+      #   path: Opera_2015_icon.svg
+      # - type: file
+      #   path: com.opera.Opera.desktop
+      # - type: script
+      #   dest-filename: opera.sh
+        # commands:
+          # - exec cobalt "$@"
