@@ -1,4 +1,4 @@
-# Opera-ffmpeg-codecs flatpak for [Opera](https://github.com/flathub/com.opera.Opera)
+# Opera-ffmpeg-codecs for [Opera flatpak](https://github.com/flathub/com.opera.Opera)
 
 ## Build:
 ```bash
