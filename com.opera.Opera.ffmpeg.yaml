@@ -8,7 +8,9 @@ base-version: '22.08'
 modules:
   - name: opera-ffmpeg
     buildsystem: simple 
-    # buildsystem: cmake-ninja
+    # buildsystem: cmake-ninja -> Error: module: opera-ffmpeg: Can't find CMakeLists.txt
+    build-options:
+      append-path: "third_party/llvm-build/Release+Asserts/bin:"
     build-commands:
       - mkdir -p /app/opera-ffmpeg
       - #tar -xf chromium.tar.xz -C /app/opera-ffmpeg
@@ -17,8 +19,8 @@ modules:
       #- python tools/clang/scripts/update.py
       #- python tools/rust/update_rust.py
       - echo $(pwd)
-      - export PATH="${pwd}/third_party/llvm-build/Release+Asserts/bin:$PATH"
-      - echo $($PATH)
+      #- export PATH="${pwd}/third_party/llvm-build/Release+Asserts/bin:$PATH"
+      #- echo $($PATH)
       - export CC="clang"
       - export CXX="clang++"
       - gn gen -v --fail-on-unused-args --args="'is_component_build=false' 'is_component_ffmpeg=true' 'use_sysroot=false' 'use_qt=false' 'use_glib=false' 'ozone_platform_x11=false'   'ffmpeg_branding=\"ChromeOS\"' 'proprietary_codecs=true' 'enable_platform_hevc=true' 'enable_platform_ac3_eac3_audio=true' 'enable_platform_mpeg_h_audio=true' 'enable_platform_dolby_vision=true' 'enable_mse_mpeg2ts_stream_parser=true'" --script-executable=/usr/bin/python out/ffmpegso
