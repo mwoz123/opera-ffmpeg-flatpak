@@ -1,3 +1,4 @@
+# compare with https://github.com/flathub/com.github.Eloston.UngoogledChromium/blob/master/com.github.Eloston.UngoogledChromium.yaml
 app-id: org.chromium.Chromium
 runtime: org.freedesktop.Platform
 runtime-version: '22.08'
