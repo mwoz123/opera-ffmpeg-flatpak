@@ -11,17 +11,30 @@ modules:
     # buildsystem: cmake-ninja
     build-commands:
       - mkdir -p /app/opera-ffmpeg
-      # - cd chromium
-      - python tools/clang/scripts/update.py
+      - tar -xf chromium.tar.xz -C /app/opera-ffmpeg
+      - echo 111111111111111111111
+      - tar -xf clang-llvmorg-18-init.tar.xz -C /app/opera-ffmpeg/third_party/llvm-build/Release+Asserts
+      # due to flathub limitations -> no download allowed (https://github.com/flatpak/flatpak-builder/issues/287#issuecomment-493287336) -> manual update as source clang-llvmorg
+      #- python tools/clang/scripts/update.py
       - python tools/rust/update_rust.py
+      - echo 222222222222222222222222
       - export PATH="${pwd}/third_party/llvm-build/Release+Asserts/bin:$PATH"
+      - echo $PATH
+      - echo 333333333333333333
       - export CC="clang"
       - export CXX="clang++"
       - gn gen -v --fail-on-unused-args --args="'is_component_build=false' 'is_component_ffmpeg=true' 'use_sysroot=false' 'use_qt=false' 'use_glib=false' 'ozone_platform_x11=false'   'ffmpeg_branding=\"ChromeOS\"' 'proprietary_codecs=true' 'enable_platform_hevc=true' 'enable_platform_ac3_eac3_audio=true' 'enable_platform_mpeg_h_audio=true' 'enable_platform_dolby_vision=true' 'enable_mse_mpeg2ts_stream_parser=true'" --script-executable=/usr/bin/python out/ffmpegso
+      - echo 444444444444444444
       - ninja -C out/ffmpegso libffmpeg.so
     sources:
       - type: archive
-        url: https://commondatastorage.googleapis.com/chromium-browser-official/chromium-120.0.6099.109.tar.xz
-        sha256: 87c00c525ee07c2233b78dbece1496b697f686244a67fac2c71e4a30bd96849b 
+        url: https://commondatastorage.googleapis.com/chromium-browser-official/chromium-120.0.6099.130.tar.xz
+        sha512: 512d8b1029492da6f2fa22d0bc80c7e34a9738b6d7f9b48366aab63cedb7a955c94384439ac35bbd54a18f2c516a8d78a260316a4d2524557ba6369f547e9d4e
         dest-filename: chromium.tar.xz
+        only-arches: [x86_64]
+      - type: archive
+        url: https://commondatastorage.googleapis.com/chromium-browser-clang/Linux_x64/clang-llvmorg-18-init-9505-g10664813-1.tar.xz 
+        # sha256: 
+        dest-filename: clang-llvmorg-18-init.tar.xz
+        # dest-path: CHROMIUM_DIR/third_party/llvm-build/Release+Asserts
         only-arches: [x86_64]
