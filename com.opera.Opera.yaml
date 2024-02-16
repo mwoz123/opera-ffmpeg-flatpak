@@ -99,8 +99,8 @@ modules:
       - mv /app/tmp-install/data/usr/lib/x86_64-linux-gnu/opera /app
       - rm -rf /app/tmp-install opera.deb
 # Disabled because of issue #28
-#      - mkdir /app/opera/lib_extra
-#      - ln -s /app/opera/chromium-codecs/lib/libffmpeg.so /app/opera/lib_extra/libffmpeg.so
+      - mkdir /app/opera/lib_extra
+      - ln -s /app/opera/chromium-codecs/lib/libffmpeg.so /app/opera/lib_extra/libffmpeg.so
       - install -Dm 644 com.opera.Opera.desktop /app/share/applications/com.opera.Opera.desktop
       - install -Dm 644 Opera_2015_icon.svg /app/share/icons/hicolor/scalable/apps/com.opera.Opera.svg
       - install -Dm 755 opera.sh /app/bin/opera
@@ -125,6 +125,12 @@ modules:
         path: Opera_2015_icon.svg
       - type: file
         path: com.opera.Opera.desktop
+      - type: archive
+        url: https://archive.archlinux.org/packages/o/opera-ffmpeg-codecs/opera-ffmpeg-codecs-120.0.6099.109-1-x86_64.pkg.tar.zst
+        sha256: 0b030df1441c65e9e75a72042607643407baf125ecef554a7060105a7ce0a3ef 
+        #dest-filename: chromium.tar.xz
+        dest: /app/opera/lib_extra
+        only-arches: [x86_64]
       - type: script
         dest-filename: opera.sh
         commands:
